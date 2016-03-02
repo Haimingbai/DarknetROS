@@ -31,6 +31,7 @@ public:
 			nh.param<std::string>("model_cfg",model_cfg,"/home/repete/DeepLearningStuff/darknet/cfg/yolo-small.cfg");
 			nh.param<std::string>("weightfile",weightfile,"/home/repete/DeepLearningStuff/darknet/weights/yolo-small.weights");
 			nh.param<std::string>("topic_name",topic_name,"/usb_cam/image_raw");
+			nh.param<float>("threshold",threshold,0.2);
 			cam_sub = it.subscribeCamera(topic_name.c_str(), 1, &MyNode::onImage, this);
 			test = 1;
 			load_yolo_model((char*)model_cfg.c_str(), (char*)weightfile.c_str());
@@ -60,8 +61,8 @@ public:
 			}
 			imageResize =1;
 			resize(cv_ptr->image, img, Size(), imageResize, imageResize);
-			float thresh = 0.2;
-			execute_yolo_model(OpencvMat2DarkNetImage(img), thresh);
+			//float thresh = 0.2;
+			execute_yolo_model(OpencvMat2DarkNetImage(img), threshold);
 			printf("State2");
 			test = 1;
 		}
@@ -89,6 +90,7 @@ public:
 private:
 	double FOV_verticalDeg,FOV_horizontal,angleTiltDegrees,cameraHeight;
 	double imageResize;
+	float threshold;
 	std::string model_cfg;
 	std::string weightfile;
 	std::string topic_name;

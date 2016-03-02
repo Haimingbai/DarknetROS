@@ -1,3 +1,2 @@
 # DarknetROS
-Darknet for ROS [here](http://pjreddie.com/darknet/).
-Darknet implemented as a package for ROS.
+A ROS-package for Darknet[here](http://pjreddie.com/darknet/).

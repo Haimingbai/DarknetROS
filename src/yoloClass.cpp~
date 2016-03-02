@@ -33,14 +33,7 @@ public:
 			nh.param<std::string>("topic_name",topic_name,"/usb_cam/image_raw");
 			cam_sub = it.subscribeCamera(topic_name.c_str(), 1, &MyNode::onImage, this);
 			test = 1;
-			//char cfgfile[] = "/home/repete/DeepLearningStuff/darknet/cfg/yolo-small.cfg";
-			//char weightfile[] = "/home/repete/DeepLearningStuff/darknet/weights/yolo-small.weights";
-			printf("State0");
-			
-			ROS_ERROR("BeforeLoadModel"); 
 			load_yolo_model((char*)model_cfg.c_str(), (char*)weightfile.c_str());
-			ROS_ERROR("AfterLoadModel"); 
-			printf("State1");
 		}
 	;
 

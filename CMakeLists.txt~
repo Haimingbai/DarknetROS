@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(darknet_ros)
 
-#set(DEBUG 0)
+#set(DEBUG 0) # Not implemented.
 set(GPU 1)
 set(OPENCV 1)
 
@@ -298,7 +298,7 @@ else()
 	set(ALL_FILES ${HEADER_FILES} ${SOURCES_C})
 endif()
 
-cuda_add_executable(darknet_ros_node src/darknet.c #yoloClass.cpp 
+cuda_add_executable(darknet_ros_node src/yoloClass.cpp # darknet.c #
 	${ALL_FILES}
 )
 

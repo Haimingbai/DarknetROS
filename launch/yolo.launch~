@@ -1,0 +1,8 @@
+<launch>	
+	<!-- Makes yolo detection node -->
+	<node type="darknet_ros_node" name="darknet_ros" pkg="darknet_ros" respawn="true" output="screen">
+		<param name="model_dir" value="$(find darknet_ros)/pedmodels/AcfInriaDetector.mat" />
+		<param name="topic_name" value="/usb/image_raw" />
+		<!-- <remap from="~image_raw" to="/image_raw" /> -->
+	</node>
+</launch>

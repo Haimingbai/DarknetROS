@@ -398,7 +398,7 @@ void execute_yolo_model(image im, float thresh) //, *float boxesOut, *float prob
     show_image(im, "predictions");
     free_image(im);
 #ifdef OPENCV
-    cvWaitKey(1);
+    cvWaitKey(10);
 #endif
 
 }

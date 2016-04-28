@@ -4,6 +4,7 @@ project(darknet_ros)
 #set(DEBUG 0) # Not implemented.
 set(GPU 1)
 set(OPENCV 1)
+set(ROS_INTERFACE 1) # THIS REQUIRES OPENCV
 
 
 set(COMMON_FLAGS "")
@@ -25,6 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   camera_info_manager
+  htf_safe_msgs
 )
 
 find_package(OpenCV REQUIRED)
@@ -120,7 +122,8 @@ set(SOURCES_C
 	src/swag.c
 	src/utils.c
 	src/writing.c
-	src/yolo.c) # "disinclude" cpu_gemm, server, std_image
+	src/yolo.c
+	src/yoloInterface.c) # "disinclude" cpu_gemm, server, std_image
 
 set(SOURCES_CU 
 	src/convolutional_kernels.cu
@@ -171,7 +174,7 @@ set(HEADER_FILES
 	src/shortcut_layer.h
 	src/softmax_layer.h
 	src/utils.h
-	src/yolo.h)
+	src/yoloInterface.h)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -286,7 +289,7 @@ include_directories(
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(darknet_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 
 # Declare a C++ executable
@@ -298,16 +301,28 @@ else()
 	set(ALL_FILES ${HEADER_FILES} ${SOURCES_C})
 endif()
 
-cuda_add_executable(darknet_ros_node src/yoloClass.cpp # darknet.c #
+if(ROS_INTERFACE)
+	cuda_add_executable(darknet_ros_node src/yoloClass.cpp # darknet.c #
+		${ALL_FILES}
+	)
+	add_dependencies(darknet_ros_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} htf_safe_msgs_gencpp)
+	# Specify libraries to link a library or executable target against
+	target_link_libraries(darknet_ros_node
+	  ${OpenCV_LIBS}
+	  ${catkin_LIBRARIES}
+	  ${CMAKE_THREAD_LIBS_INIT}
+	  ${CUDA_LIBRARIES}
+	  ${CUDA_CUBLAS_LIBRARIES}
+	  ${CUDA_curand_LIBRARY}
+	)
+endif()
+
+cuda_add_executable(darknet src/darknet.c #
 	${ALL_FILES}
 )
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(darknet_ros_node $-lcudart
-
 # Specify libraries to link a library or executable target against
-target_link_libraries(darknet_ros_node
+target_link_libraries(darknet
   ${OpenCV_LIBS}
   ${catkin_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
@@ -315,7 +330,6 @@ target_link_libraries(darknet_ros_node
   ${CUDA_CUBLAS_LIBRARIES}
   ${CUDA_curand_LIBRARY}
 )
-
 #############
 ## Install ##
 #############

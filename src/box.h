@@ -6,6 +6,10 @@ typedef struct{
 } box;
 
 typedef struct{
+    float x, y, w, h,prob,objectType;
+} box_prob;
+
+typedef struct{
     float dx, dy, dw, dh;
 } dbox;
 

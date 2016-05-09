@@ -13,6 +13,7 @@
 #include <sensor_msgs/image_encodings.h>
 //#include <sensor_msgs/CompressedImage.h>
 #include <image_transport/image_transport.h>
+#include <boost/algorithm/string.hpp>
 //#include <camera_info_manager/camera_info_manager.h>
 #include <math.h>
 
@@ -29,6 +30,9 @@ using namespace cv;
 
 char *voc_names2[] = {"aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor","barrel","birdnest"};
 #define NCLASSES 22
+//int remapYolo2NewObjectTypes[] = {0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+// YoloObstacle 0, YoloVehicle 1, YoloHuman 2
+float remapYolo2NewObjectTypes[] = {0,1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0,0,0};
 class MyNode {
 public:
 	MyNode() :
@@ -37,7 +41,9 @@ public:
 			nh.param<std::string>("weightfile",weightfile,"/weight/yoloSmall20.weights");
 			nh.param<std::string>("topic_name",topic_name,"/usb_cam/image_raw");
 			nh.param<float>("threshold",threshold,0.2);
-			
+			vector<string> strParts;
+			boost::split(strParts,topic_name,boost::is_any_of("/"));
+
 			// Distance estimate.
 			nh.param<double>("FOV_verticalDeg",FOV_verticalDeg,47.0);
 			nh.param<double>("FOV_horizontalDeg",FOV_horizontalDeg,83.0);
@@ -51,14 +57,19 @@ public:
 			//sub_image = it.subscribeCamera(topic_name.c_str(), 1, &MyNode::onImage, this);
 			sub_image = it.subscribe(topic_name.c_str(), 1, &MyNode::onImage, this);
 			pub_image = it.advertise("imageYolo", 1);
-			pub_bb = nh.advertise<std_msgs::Float64MultiArray>("BBox", 1);
+			
+			vector<string> outputTopicTmp;
+			outputTopicTmp.push_back("BBox");
+			outputTopicTmp.push_back(strParts[1]);
+			pub_bb = nh.advertise<std_msgs::Float64MultiArray>(boost::algorithm::join(outputTopicTmp,"/"), 1);
 			pub_bbSAFE = nh.advertise<htf_safe_msgs::SAFEObstacleMsg>("BBoxSAFE", 1);
-			test = 1;
+			readyToPublish = 1;
+			printf("Prior Loading model: \r\n");
 			maxDetections = load_yolo_model((char*)model_cfg.c_str(), (char*)weightfile.c_str());
-			printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TOPIC: %s",topic_name.c_str());
 			boxes = (box*)calloc(maxDetections, sizeof(box));
 			probs = (float**)calloc(maxDetections, sizeof(float *));
 			for(int j = 0; j < maxDetections; ++j) probs[j] = (float*)calloc(NCLASSES, sizeof(float *));
+			printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TOPIC: %s \r\n",topic_name.c_str());
 		};
 
 	~MyNode() {
@@ -70,10 +81,10 @@ public:
 
 	//void onImage(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::CameraInfoConstPtr& p) {
 	void onImage(const sensor_msgs::ImageConstPtr& msg) {
-		
-		if(test==1)
+		printf("Yolo: image received \r\n");
+		if(readyToPublish==1)
 		{
-			test = 0;
+			readyToPublish = 0;
 			 
 			cv_bridge::CvImagePtr cv_ptr;
 			try {
@@ -91,7 +102,7 @@ public:
 			publish_detections(cv_ptr->image, maxDetections, threshold, boxes, probs,voc_names2);
 			
 			free_image(im);
-			test = 1;
+			readyToPublish = 1;
 		}
 	}
 	image OpencvMat2DarkNetImage(Mat src)
@@ -212,7 +223,7 @@ public:
 			bboxMsg.data.push_back(detections[iBbs].w/img.cols);
 			bboxMsg.data.push_back(detections[iBbs].h/img.rows);
 			bboxMsg.data.push_back(detections[iBbs].prob);
-			bboxMsg.data.push_back(detections[iBbs].objectType);
+			bboxMsg.data.push_back(remapYolo2NewObjectTypes[int(detections[iBbs].objectType)]);
 		}
 		pub_bb.publish(bboxMsg);
 
@@ -244,7 +255,7 @@ private:
 	ros::Publisher pub_bb;
 	ros::Publisher pub_bbSAFE;
 	//boost::shared_ptr<camera_info_manager::CameraInfoManager> cinfor_;
-	bool test;
+	bool readyToPublish;
 	box *boxes;
 	float **probs;
 	int maxDetections;

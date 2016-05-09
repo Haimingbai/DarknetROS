@@ -17,13 +17,19 @@ network glo_net;
 int load_yolo_model(char *cfgfile, char *weightfile)
 {
     int maxSize = 0;
-    printf("%s",cfgfile);
+    printf("Loading: %s \r\n",cfgfile);
+	//printf("Test0 \r\n");
     glo_net = parse_network_cfg(cfgfile);
+	//printf("Test1, %s %s \r\n",cfgfile,weightfile);
     if(weightfile){
         load_weights(&glo_net, weightfile);
     }
+	//printf("Test2 \r\n");
     set_batch_network(&glo_net, 1);
+	//printf("Test3 \r\n");
     detection_layer l = glo_net.layers[glo_net.n-1];
+	//printf("Test4 \r\n");
+	printf("Done loading %s \r\n",cfgfile);
     return l.side*l.side*l.n; // returns the maximum possible number of detections
 }
 

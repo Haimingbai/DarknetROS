@@ -26,7 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   camera_info_manager
-  htf_safe_msgs
+  #htf_safe_msgs
 )
 
 find_package(OpenCV REQUIRED)

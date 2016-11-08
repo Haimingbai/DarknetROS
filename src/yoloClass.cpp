@@ -9,7 +9,7 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/MultiArrayDimension.h>
 #include <std_msgs/MultiArrayLayout.h>
-#include <htf_safe_msgs/SAFEObstacleMsg.h>
+//#include <htf_safe_msgs/SAFEObstacleMsg.h>
 #include <sensor_msgs/image_encodings.h>
 //#include <sensor_msgs/CompressedImage.h>
 #include <image_transport/image_transport.h>
@@ -62,7 +62,7 @@ public:
 			outputTopicTmp.push_back("BBox");
 			outputTopicTmp.push_back(strParts[1]);
 			pub_bb = nh.advertise<std_msgs::Float64MultiArray>(boost::algorithm::join(outputTopicTmp,"/"), 1);
-			pub_bbSAFE = nh.advertise<htf_safe_msgs::SAFEObstacleMsg>("BBoxSAFE", 1);
+			//pub_bbSAFE = nh.advertise<htf_safe_msgs::SAFEObstacleMsg>("BBoxSAFE", 1);
 			readyToPublish = 1;
 			printf("Prior Loading model: \r\n");
 			maxDetections = load_yolo_model((char*)model_cfg.c_str(), (char*)weightfile.c_str());
@@ -175,11 +175,11 @@ public:
 		
 		// An estimate of the distance to the object is calculated using the camera setup.
 		// Estimate is based on two assumptions: 1) The surface is flat. 2) The bottom of the bounding box is the bottom of the detected object.
-		if(1){
+		/*if(1){
 			printf("Start bboxSAFE \n");
 			double resolutionVertical = img.rows;
 			double resolutionHorisontal = img.cols;
-			htf_safe_msgs::SAFEObstacleMsg msgObstacle;
+			//htf_safe_msgs::SAFEObstacleMsg msgObstacle;
 			// MAYBE CLEARING IS NEEDED
 			msgObstacle.xCoordinate.clear();
 			msgObstacle.yCoordinate.clear();
@@ -208,7 +208,7 @@ public:
 				//cout << "Distance: " <<  bbs[n].distance << endl;
 			}
 			pub_bbSAFE.publish(msgObstacle);
-		}
+		}*/
 
 
 		// Create bounding box publisher (multi array)

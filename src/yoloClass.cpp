@@ -31,7 +31,7 @@ using namespace cv;
 char *voc_names2[] = {"aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor","barrel","birdnest"};
 #define NCLASSES 22
 //int remapYolo2NewObjectTypes[] = {0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
-// YoloObstacle 0, YoloVehicle 1, YoloHuman 2
+// Unknown 0, YoloVehicle 1, YoloHuman 2
 float remapYolo2NewObjectTypes[] = {0,1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0,0,0};
 class MyNode {
 public:

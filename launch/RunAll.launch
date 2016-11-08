@@ -10,7 +10,7 @@
 
 
 	<!-- RUNS THERMAL CAM -->
-	<node name="camnode" pkg="camera_aravis" type="camnode" output="screen" >
+		<node name="camnode" pkg="camera_aravis" type="camnode" output="screen" >
 	</node>
 
 	<!-- RUNS  MULTISENSE S21-->

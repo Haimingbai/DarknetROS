@@ -10,6 +10,7 @@ set(ROS_INTERFACE 1) # THIS REQUIRES OPENCV
 set(COMMON_FLAGS "")
 if (GPU)
 	set(COMMON_FLAGS "${COMMON_FLAGS} -DGPU" )
+	find_package(CUDA REQUIRED)
 endif()
 
 if (OPENCV)
@@ -30,7 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(OpenCV REQUIRED)
-find_package(CUDA REQUIRED)
+
 find_package(BLAS)
 find_package(Threads)
 
@@ -302,9 +303,13 @@ else()
 endif()
 
 if(ROS_INTERFACE)
-	cuda_add_executable(darknet_ros_node src/yoloClass.cpp # darknet.c #
-		${ALL_FILES}
-	)
+
+	if(GPU)
+		cuda_add_executable(darknet_ros_node src/yoloClass.cpp ${ALL_FILES} )
+	else()
+		add_executable(darknet_ros_node src/yoloClass.cpp ${ALL_FILES} )
+	endif()
+
 	add_dependencies(darknet_ros_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} htf_safe_msgs_gencpp)
 	# Specify libraries to link a library or executable target against
 	target_link_libraries(darknet_ros_node
@@ -317,10 +322,11 @@ if(ROS_INTERFACE)
 	)
 endif()
 
-cuda_add_executable(darknet src/darknet.c #
-	${ALL_FILES}
-)
-
+if(GPU)
+	cuda_add_executable(darknet src/darknet.c ${ALL_FILES} )
+else()
+	add_executable(darknet src/darknet.c ${ALL_FILES} )
+endif()
 # Specify libraries to link a library or executable target against
 target_link_libraries(darknet
   ${OpenCV_LIBS}
